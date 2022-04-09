@@ -2,22 +2,23 @@ package main
 
 import (
 	"github.com/devcarlosl/book-api/pkg/books"
+	"github.com/devcarlosl/book-api/pkg/common/config"
 	"github.com/devcarlosl/book-api/pkg/common/db"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
+	"log"
 )
 
 func main() {
-	viper.SetConfigFile("./pkg/common/envs/.env")
-	viper.ReadInConfig()
+	c, err := config.LoadConfig()
 
-	port := viper.Get("PORT").(string)
-	dbUrl := viper.Get("DB_URL").(string)
+	if err != nil {
+		log.Fatalln("Failed at config", err)
+	}
 
 	r := gin.Default()
-	h := db.Init(dbUrl)
+	h := db.Init(&c)
 
 	books.RegisterRoutes(r, h)
 
-	r.Run(port)
+	r.Run(c.Port)
 }
